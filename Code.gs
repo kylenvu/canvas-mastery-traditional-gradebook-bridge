@@ -15,7 +15,62 @@ function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
-function parseGradeCsv(csvText) {
+function parseTraditionalGradebookCsv(csvText) {
+  if (!csvText || typeof csvText !== 'string') {
+    throw new Error('No CSV data was provided.');
+  }
+
+  var rows = Utilities.parseCsv(csvText);
+  if (rows.length < 2) {
+    return {
+      error: 'No student data found in the traditional gradebook export.'
+    };
+  }
+
+  var headers = rows[0].map(function(header) {
+    return String(header).trim();
+  });
+  var studentIndex = findHeaderIndex_(headers, 'Student');
+  var idIndex = findHeaderIndex_(headers, 'ID');
+  var sisUserIdIndex = findHeaderIndex_(headers, 'SIS User ID');
+  var sisLoginIdIndex = findHeaderIndex_(headers, 'SIS Login ID');
+  var sectionIndex = findHeaderIndex_(headers, 'Section');
+
+  if ([studentIndex, idIndex, sisUserIdIndex, sisLoginIdIndex, sectionIndex].some(function(index) {
+    return index === -1;
+  })) {
+    return {
+      error: 'The traditional gradebook export must include Student, ID, SIS User ID, SIS Login ID, and Section columns.'
+    };
+  }
+
+  var students = rows.slice(1)
+    .filter(function(row) {
+      return String(row[studentIndex] || '').trim() !== '' && String(row[idIndex] || '').trim() !== '';
+    })
+    .map(function(row) {
+      return {
+        id: row[idIndex] || '',
+        name: formatStudentName_(row[studentIndex] || ''),
+        sisUserId: row[sisUserIdIndex] || '',
+        sisLoginId: row[sisLoginIdIndex] || '',
+        section: row[sectionIndex] || ''
+      };
+    })
+    .sort(compareStudentsByName_);
+
+  if (students.length === 0) {
+    return {
+      error: 'No student roster rows were found in the traditional gradebook export.'
+    };
+  }
+
+  return {
+    students: students
+  };
+}
+
+function parseGradeCsv(csvText, rosterStudents) {
   if (!csvText || typeof csvText !== 'string') {
     throw new Error('No CSV data was provided.');
   }
@@ -63,18 +118,27 @@ function parseGradeCsv(csvText) {
     };
   }
 
+  var rosterById = buildRosterById_(rosterStudents || []);
   var students = studentRows
     .map(function(row) {
+      var studentId = row[studentIdIndex] || '';
+      var rosterStudent = rosterById[String(studentId).trim()] || {};
+
       return {
-        id: row[studentIdIndex] || '',
-        name: row[studentNameIndex] || '',
+        id: studentId,
+        name: rosterStudent.name || formatStudentName_(row[studentNameIndex] || ''),
+        sisUserId: rosterStudent.sisUserId || '',
+        sisLoginId: rosterStudent.sisLoginId || '',
+        section: rosterStudent.section || '',
         scores: assignmentColumns.map(function(column) {
           return row[column.index] || '';
         })
       };
-    });
+    })
+    .sort(compareStudentsByName_);
 
   return {
+    studentFields: ['Student ID', 'Student Name', 'SIS User ID', 'SIS Login ID', 'Section'],
     assignments: assignmentColumns.map(function(column) {
       return column.name;
     }),
@@ -96,6 +160,39 @@ function getAssignmentName_(header) {
 function columnHasScores_(rows, columnIndex) {
   return rows.some(function(row) {
     return String(row[columnIndex] || '').trim() !== '';
+  });
+}
+
+function formatStudentName_(name) {
+  var trimmedName = String(name).trim();
+
+  if (trimmedName.indexOf(',') !== -1) {
+    return trimmedName;
+  }
+
+  var parts = trimmedName.split(/\s+/);
+
+  if (parts.length < 2) {
+    return trimmedName;
+  }
+
+  var lastName = parts.pop();
+  return lastName + ', ' + parts.join(' ');
+}
+
+function buildRosterById_(students) {
+  return students.reduce(function(rosterById, student) {
+    var id = String(student.id || '').trim();
+    if (id) {
+      rosterById[id] = student;
+    }
+    return rosterById;
+  }, {});
+}
+
+function compareStudentsByName_(a, b) {
+  return String(a.name || '').localeCompare(String(b.name || ''), undefined, {
+    sensitivity: 'base'
   });
 }
 

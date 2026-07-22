@@ -10,17 +10,18 @@
       return;
     }
 
-    renderGradesTable(parsedGrades.students || [], parsedGrades.assignments || []);
+    renderGradesTable(parsedGrades.students || [], parsedGrades.assignments || [], parsedGrades.studentFields || []);
   }
 
-  function renderGradesTable(students, assignments) {
+  function renderGradesTable(students, assignments, studentFields) {
     var gradesTab = document.getElementById("grades-tab");
     var table = document.createElement("table");
     table.className = "table table-striped table-hover grades-table mb-0";
 
     var thead = document.createElement("thead");
     var headerRow = document.createElement("tr");
-    ["Student ID", "Student Name"].concat(assignments).forEach(function(header) {
+    var identityHeaders = studentFields.length ? studentFields : ["Student ID", "Student Name"];
+    identityHeaders.concat(assignments).forEach(function(header) {
       var th = document.createElement("th");
       th.scope = "col";
       th.textContent = header;
@@ -32,7 +33,7 @@
     var tbody = document.createElement("tbody");
     students.forEach(function(student) {
       var tr = document.createElement("tr");
-      [student.id, student.name].concat(student.scores).forEach(function(value) {
+      getStudentIdentityValues(student, identityHeaders).concat(student.scores).forEach(function(value) {
         var td = document.createElement("td");
         td.textContent = value;
         tr.appendChild(td);
@@ -46,6 +47,20 @@
     wrapper.appendChild(table);
 
     replaceElementChildren(gradesTab, wrapper);
+  }
+
+  function getStudentIdentityValues(student, identityHeaders) {
+    var identityValueMap = {
+      "Student ID": student.id || "",
+      "Student Name": student.name || "",
+      "SIS User ID": student.sisUserId || "",
+      "SIS Login ID": student.sisLoginId || "",
+      "Section": student.section || ""
+    };
+
+    return identityHeaders.map(function(header) {
+      return identityValueMap[header] || "";
+    });
   }
 
   function renderGradesMessage(message) {

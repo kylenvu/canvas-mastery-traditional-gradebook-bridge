@@ -40,6 +40,43 @@
       </div>
     </div>
 
+    <!-- Upload Modal -->
+    <div class="modal fade" id="upload-modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Upload Gradebook Files</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="upload-step" id="traditional-upload-step">
+              <div class="d-flex align-items-center justify-content-between gap-3">
+                <div>
+                  <h6 class="fw-bold mb-1">Traditional Gradebook Export</h6>
+                  <p class="mb-0 text-muted">Upload the Canvas traditional gradebook export first.</p>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="triggerTraditionalGradebookSelect()">Upload file</button>
+              </div>
+              <div class="small mt-2" id="traditional-upload-status">Waiting for file.</div>
+            </div>
+
+            <hr>
+
+            <div class="upload-step upload-step-disabled" id="mastery-upload-step">
+              <div class="d-flex align-items-center justify-content-between gap-3">
+                <div>
+                  <h6 class="fw-bold mb-1">Mastery Gradebook Export</h6>
+                  <p class="mb-0 text-muted">Upload the mastery outcome CSV after the traditional export is processed.</p>
+                </div>
+                <button type="button" class="btn btn-primary" id="mastery-upload-button" onclick="triggerMasteryGradebookSelect()" disabled>Upload file</button>
+              </div>
+              <div class="small mt-2" id="mastery-upload-status">Complete the first upload to continue.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="container mt-4">
       
       <!-- Top Panel -->
@@ -85,8 +122,9 @@
           </div>
         </div>
 
-        <!-- Hidden Native File Input -->
-        <input type="file" id="file-input" accept=".csv" style="display: none;" onchange="handleFileSelected(event)">
+        <!-- Hidden Native File Inputs -->
+        <input type="file" id="traditional-file-input" accept=".csv" style="display: none;" onchange="handleTraditionalFileSelected(event)">
+        <input type="file" id="mastery-file-input" accept=".csv" style="display: none;" onchange="handleMasteryFileSelected(event)">
 
         <!-- Upload File Button -->
         <button type="button" class="btn btn-info fw-bold" onclick="handleUploadClick()">Upload file</button>
