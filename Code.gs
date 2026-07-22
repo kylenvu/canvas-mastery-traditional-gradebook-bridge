@@ -138,7 +138,7 @@ function parseGradeCsv(csvText, rosterStudents) {
     .sort(compareStudentsByName_);
 
   return {
-    studentFields: ['Student ID', 'Student Name', 'SIS User ID', 'SIS Login ID', 'Section'],
+    studentFields: ['Student ID', 'Student Name'],
     assignments: assignmentColumns.map(function(column) {
       return column.name;
     }),
