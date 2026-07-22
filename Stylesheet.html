@@ -270,54 +270,25 @@
     border-width: 2px !important;
   }
 
-  .footer-tag,
-  .version-tag,
-  .license-tag,
-  .acknowledgement-tag {
-    position: fixed;
-    bottom: 12px;
-    font-size: 13px;
-    color: #000;
-    font-weight: bold;
-    user-select: none;
-    background-color: #fff;
-    padding: 4px 8px;
-    border: 1px solid #000;
-    border-radius: 4px;
-  }
-
-  .license-tag {
-    left: 18px;
+  .license-inline {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
     gap: 3px 5px;
-    line-height: 1.25;
-    max-width: min(520px, calc(50vw - 42px));
+    line-height: 1.35;
   }
 
-  .license-tag a {
+  .license-inline a {
     color: #0d6efd;
     text-decoration: none;
   }
 
-  .license-tag a:hover {
+  .license-inline a:hover {
     text-decoration: underline;
   }
 
-  .license-tag img {
+  .license-inline img {
     height: 1em;
     width: 1em;
-  }
-
-  .acknowledgement-tag {
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    max-width: min(520px, calc(100vw - 220px));
-  }
-
-  .version-tag {
-    right: 18px;
   }
 </style>
