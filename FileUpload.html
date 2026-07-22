@@ -1,12 +1,87 @@
 <script>
   var traditionalGradebookRoster = null;
   var uploadModalInstance = null;
+  var maxScoreModalInstance = null;
 
   // --- Upload Flow Functions ---
   function handleUploadClick() {
+    if (!hasValidMaxScore()) {
+      showMaxScoreModal();
+      return;
+    }
+
+    showUploadModal();
+  }
+
+  function showUploadModal() {
     var uploadModal = document.getElementById("upload-modal");
     uploadModalInstance = bootstrap.Modal.getOrCreateInstance(uploadModal);
     uploadModalInstance.show();
+  }
+
+  function showMaxScoreModal() {
+    var maxScoreModal = document.getElementById("max-score-modal");
+    var modalInput = document.getElementById("max-score-modal-input");
+    var mainInput = document.getElementById("max-score-input");
+
+    modalInput.value = mainInput.value || "";
+    clearMaxScoreModalError();
+    maxScoreModalInstance = bootstrap.Modal.getOrCreateInstance(maxScoreModal);
+    maxScoreModalInstance.show();
+
+    maxScoreModal.addEventListener("shown.bs.modal", function focusMaxScoreInput() {
+      modalInput.focus();
+      maxScoreModal.removeEventListener("shown.bs.modal", focusMaxScoreInput);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    var modalInput = document.getElementById("max-score-modal-input");
+    if (!modalInput) {
+      return;
+    }
+
+    modalInput.addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        saveMaxScoreAndContinue();
+      }
+    });
+
+    modalInput.addEventListener("input", clearMaxScoreModalError);
+  });
+
+  function saveMaxScoreAndContinue() {
+    var modalInput = document.getElementById("max-score-modal-input");
+    var scoreVal = parseInt(modalInput.value, 10);
+
+    if (isNaN(scoreVal) || scoreVal <= 0 || String(scoreVal) !== modalInput.value.trim()) {
+      showMaxScoreModalError();
+      return;
+    }
+
+    document.getElementById("max-score-input").value = scoreVal;
+
+    if (maxScoreModalInstance) {
+      maxScoreModalInstance.hide();
+    }
+
+    showUploadModal();
+  }
+
+  function hasValidMaxScore() {
+    var maxScoreField = document.getElementById("max-score-input");
+    var scoreVal = parseInt(maxScoreField.value, 10);
+
+    return maxScoreField.value.trim() !== "" && !isNaN(scoreVal) && scoreVal > 0 && String(scoreVal) === maxScoreField.value.trim();
+  }
+
+  function showMaxScoreModalError() {
+    document.getElementById("max-score-modal-error").classList.remove("d-none");
+  }
+
+  function clearMaxScoreModalError() {
+    document.getElementById("max-score-modal-error").classList.add("d-none");
   }
 
   function triggerTraditionalGradebookSelect() {
