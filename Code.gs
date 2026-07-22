@@ -119,22 +119,32 @@ function parseGradeCsv(csvText, rosterStudents) {
   }
 
   var rosterById = buildRosterById_(rosterStudents || []);
+  var unmatchedStudents = [];
   var students = studentRows
-    .map(function(row) {
-      var studentId = row[studentIdIndex] || '';
-      var rosterStudent = rosterById[String(studentId).trim()] || {};
+    .reduce(function(foundStudents, row) {
+      var studentId = String(row[studentIdIndex] || '').trim();
+      var rosterStudent = rosterById[studentId];
 
-      return {
+      if (!rosterStudent) {
+        unmatchedStudents.push({
+          id: studentId,
+          name: formatStudentName_(row[studentNameIndex] || '')
+        });
+        return foundStudents;
+      }
+
+      foundStudents.push({
         id: studentId,
-        name: rosterStudent.name || formatStudentName_(row[studentNameIndex] || ''),
+        name: rosterStudent.name,
         sisUserId: rosterStudent.sisUserId || '',
         sisLoginId: rosterStudent.sisLoginId || '',
         section: rosterStudent.section || '',
         scores: assignmentColumns.map(function(column) {
           return row[column.index] || '';
         })
-      };
-    })
+      });
+      return foundStudents;
+    }, [])
     .sort(compareStudentsByName_);
 
   return {
@@ -142,7 +152,9 @@ function parseGradeCsv(csvText, rosterStudents) {
     assignments: assignmentColumns.map(function(column) {
       return column.name;
     }),
-    students: students
+    students: students,
+    unmatchedStudents: unmatchedStudents,
+    warning: buildRosterMismatchWarning_(unmatchedStudents, studentRows.length)
   };
 }
 
@@ -194,6 +206,18 @@ function compareStudentsByName_(a, b) {
   return String(a.name || '').localeCompare(String(b.name || ''), undefined, {
     sensitivity: 'base'
   });
+}
+
+function buildRosterMismatchWarning_(unmatchedStudents, totalStudents) {
+  if (unmatchedStudents.length === 0) {
+    return '';
+  }
+
+  if (unmatchedStudents.length === totalStudents) {
+    return 'None of the students in the mastery gradebook were found in the uploaded roster. No scores were displayed.';
+  }
+
+  return unmatchedStudents.length + ' students in the mastery gradebook were not found in the uploaded roster. Scores for those students were excluded.';
 }
 
 function findHeaderIndex_(headers, columnName) {
