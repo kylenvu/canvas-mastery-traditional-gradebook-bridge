@@ -86,7 +86,7 @@
 
   function getStudentIdentityValues(student, identityHeaders) {
     var identityValueMap = {
-      "Student ID": student.id || "",
+      "Student ID": getDisplayStudentId(student),
       "Student Name": student.name || "",
       "SIS User ID": student.sisUserId || "",
       "SIS Login ID": student.sisLoginId || "",
@@ -150,7 +150,11 @@
     var selectedView = getAverageScoreViewMode();
     var maxScore = getMaxScoreValue();
     var content = document.createDocumentFragment();
-    content.appendChild(createAverageScoreOptions(selectedView, maxScore));
+    var controls = createSummaryControls(
+      createAverageScoreOptions(selectedView, maxScore),
+      createExportButton("Export CSV", exportAverageScoresCsv)
+    );
+    content.appendChild(controls);
 
     if (selectedView === "percent" && !maxScore) {
       var warning = document.createElement("div");
@@ -177,7 +181,7 @@
     students.forEach(function(student) {
       var tr = document.createElement("tr");
       [
-        student.id || "",
+        getDisplayStudentId(student),
         student.name || "",
         student.section || "",
         formatAverageScore(student.scores || [], selectedView, maxScore)
@@ -320,15 +324,13 @@
     var selectedView = getNumberMasteredViewMode();
     var content = document.createDocumentFragment();
 
-    var controls = document.createElement("div");
-    controls.className = "summary-controls";
-    controls.appendChild(createNumberMasteredOptions(selectedView));
-
-    var total = document.createElement("div");
-    total.className = "summary-total";
-    total.textContent = "Total standards: " + totalStandards;
-    controls.appendChild(total);
-    content.appendChild(controls);
+    content.appendChild(createSummaryControls(
+      createNumberMasteredOptions(selectedView),
+      createSummaryActions([
+        createExportButton("Export CSV", exportNumberMasteredCsv),
+        createSummaryTotal("Total standards: " + totalStandards)
+      ])
+    ));
 
     var table = document.createElement("table");
     table.className = "table table-striped table-hover summary-table mb-0";
@@ -348,7 +350,7 @@
     students.forEach(function(student) {
       var tr = document.createElement("tr");
       [
-        student.id || "",
+        getDisplayStudentId(student),
         student.name || "",
         student.section || "",
         formatNumberMastered(student.numberMastered || 0, totalStandards, selectedView)
@@ -447,6 +449,130 @@
     replaceElementChildren(gradesTab, loading);
     renderExportMessage("Waiting for grade data.");
     renderNumberMasteredMessage("Waiting for grade data.");
+  }
+
+  function getDisplayStudentId(student) {
+    return student.sisUserId || student.id || "";
+  }
+
+  function createSummaryControls(options, actions) {
+    var controls = document.createElement("div");
+    controls.className = "summary-controls";
+    controls.appendChild(options);
+    controls.appendChild(actions);
+    return controls;
+  }
+
+  function createSummaryActions(children) {
+    var actions = document.createElement("div");
+    actions.className = "summary-actions";
+
+    children.forEach(function(child) {
+      actions.appendChild(child);
+    });
+
+    return actions;
+  }
+
+  function createSummaryTotal(text) {
+    var total = document.createElement("div");
+    total.className = "summary-total";
+    total.textContent = text;
+    return total;
+  }
+
+  function createExportButton(label, clickHandler) {
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn btn-primary";
+    button.textContent = label;
+    button.addEventListener("click", clickHandler);
+    return button;
+  }
+
+  function exportAverageScoresCsv() {
+    var selectedView = getAverageScoreViewMode();
+    var maxScore = getMaxScoreValue();
+
+    if (selectedView === "percent") {
+      exportSummaryCsv({
+        students: averageScoreStudents,
+        assignmentName: "Total Average Score",
+        pointsPossible: "100",
+        fileName: "average-scores.csv",
+        scoreFormatter: function(student) {
+          return formatAverageScore(student.scores || [], selectedView, maxScore);
+        }
+      });
+      return;
+    }
+
+    exportSummaryCsv({
+      students: averageScoreStudents,
+      assignmentName: "Total Average Score",
+      pointsPossible: maxScore ? maxScore.toFixed(2) : "",
+      fileName: "average-scores.csv",
+      scoreFormatter: function(student) {
+        return formatAverageScore(student.scores || [], selectedView, maxScore);
+      }
+    });
+  }
+
+  function exportNumberMasteredCsv() {
+    exportSummaryCsv({
+      students: numberMasteredStudents,
+      assignmentName: "Number Mastered",
+      pointsPossible: "100",
+      fileName: "number-mastered.csv",
+      scoreFormatter: function(student) {
+        return formatNumberMastered(student.numberMastered || 0, numberMasteredTotalStandards, "percent").replace("%", "");
+      }
+    });
+  }
+
+  function exportSummaryCsv(config) {
+    var rows = [
+      ["Student", "ID", "SIS User ID", "SIS Login ID", "Section", config.assignmentName],
+      ["", "", "", "", "", ""],
+      ["Points Possible", "", "", "", "", config.pointsPossible]
+    ].concat(config.students.map(function(student) {
+      return [
+        student.name || "",
+        student.id || "",
+        student.sisUserId || "",
+        student.sisLoginId || "",
+        student.section || "",
+        config.scoreFormatter(student)
+      ];
+    }));
+
+    downloadCsv(config.fileName, rows);
+  }
+
+  function downloadCsv(fileName, rows) {
+    var csvText = rows.map(function(row) {
+      return row.map(escapeCsvValue).join(",");
+    }).join("\r\n");
+    var blob = new Blob([csvText], { type: "text/csv;charset=utf-8;" });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function escapeCsvValue(value) {
+    var text = String(value == null ? "" : value);
+
+    if (/[",\r\n]/.test(text)) {
+      return '"' + text.replace(/"/g, '""') + '"';
+    }
+
+    return text;
   }
 
   function replaceElementChildren(element, child) {
