@@ -40,14 +40,34 @@
     var file = event.target.files[0];
     if (file) {
       // Basic extension validation
-      if (!file.name.endsWith('.csv')) {
+      if (!file.name.toLowerCase().endsWith('.csv')) {
         alert("Please select a valid .csv file.");
         event.target.value = ''; // Reset input
         return;
       }
 
       console.log("File ready to upload:", file.name);
-      // Server-side upload handling will go here
+      renderGradesLoading("Reading CSV file...");
+
+      var reader = new FileReader();
+      reader.onload = function(loadEvent) {
+        renderGradesLoading("Parsing CSV file...");
+
+        google.script.run
+          .withSuccessHandler(function(parsedGrades) {
+            renderParsedGrades(parsedGrades);
+          })
+          .withFailureHandler(function(error) {
+            console.error("CSV parsing failed:", error);
+            renderGradesMessage("The selected CSV could not be parsed. Please check the file and try again.");
+          })
+          .parseGradeCsv(loadEvent.target.result);
+      };
+      reader.onerror = function() {
+        alert("The selected file could not be read. Please try again.");
+        renderGradesMessage("The selected file could not be read. Please try again.");
+      };
+      reader.readAsText(file);
     }
   }
 </script>

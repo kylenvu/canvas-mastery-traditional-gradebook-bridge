@@ -1,0 +1,75 @@
+<script>
+  function renderParsedGrades(parsedGrades) {
+    if (!parsedGrades) {
+      renderGradesMessage("No grade data was returned from the server.");
+      return;
+    }
+
+    if (parsedGrades.error) {
+      renderGradesMessage(parsedGrades.error);
+      return;
+    }
+
+    renderGradesTable(parsedGrades.students || [], parsedGrades.assignments || []);
+  }
+
+  function renderGradesTable(students, assignments) {
+    var gradesTab = document.getElementById("grades-tab");
+    var table = document.createElement("table");
+    table.className = "table table-striped table-hover grades-table mb-0";
+
+    var thead = document.createElement("thead");
+    var headerRow = document.createElement("tr");
+    ["Student ID", "Student Name"].concat(assignments).forEach(function(header) {
+      var th = document.createElement("th");
+      th.scope = "col";
+      th.textContent = header;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    var tbody = document.createElement("tbody");
+    students.forEach(function(student) {
+      var tr = document.createElement("tr");
+      [student.id, student.name].concat(student.scores).forEach(function(value) {
+        var td = document.createElement("td");
+        td.textContent = value;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    var wrapper = document.createElement("div");
+    wrapper.className = "grades-table-wrapper";
+    wrapper.appendChild(table);
+
+    replaceElementChildren(gradesTab, wrapper);
+  }
+
+  function renderGradesMessage(message) {
+    var gradesTab = document.getElementById("grades-tab");
+
+    var alert = document.createElement("div");
+    alert.className = "alert alert-warning mb-0";
+    alert.textContent = message;
+    replaceElementChildren(gradesTab, alert);
+  }
+
+  function renderGradesLoading(message) {
+    var gradesTab = document.getElementById("grades-tab");
+
+    var loading = document.createElement("div");
+    loading.className = "alert alert-info mb-0";
+    loading.textContent = message;
+    replaceElementChildren(gradesTab, loading);
+  }
+
+  function replaceElementChildren(element, child) {
+    while (element.firstChild) {
+      element.removeChild(element.firstChild);
+    }
+    element.appendChild(child);
+  }
+</script>

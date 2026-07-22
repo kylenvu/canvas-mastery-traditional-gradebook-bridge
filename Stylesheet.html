@@ -78,6 +78,32 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 
+  .grades-table-wrapper {
+    max-height: 560px;
+    overflow: auto;
+  }
+
+  .grades-table {
+    min-width: 900px;
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  .grades-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #0d6efd !important;
+    color: #fff;
+    border-bottom: 2px solid #000;
+  }
+
+  .grades-table th,
+  .grades-table td {
+    border: 1px solid #000;
+    vertical-align: middle;
+  }
+
   /* High Contrast Modals */
   .modal-content {
     border: 3px solid #000 !important;
