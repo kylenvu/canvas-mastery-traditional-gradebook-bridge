@@ -104,8 +104,77 @@
     vertical-align: middle;
   }
 
+  .grades-table th:nth-child(1),
+  .grades-table td:nth-child(1) {
+    left: 0;
+    min-width: 120px;
+    position: sticky;
+    z-index: 2;
+  }
+
+  .grades-table th:nth-child(2),
+  .grades-table td:nth-child(2) {
+    left: 120px;
+    min-width: 180px;
+    position: sticky;
+    z-index: 2;
+  }
+
+  .grades-table td:nth-child(1),
+  .grades-table td:nth-child(2) {
+    background-color: #fff;
+  }
+
+  .grades-table tbody tr:nth-of-type(odd) td:nth-child(1),
+  .grades-table tbody tr:nth-of-type(odd) td:nth-child(2) {
+    background-color: #f2f2f2;
+  }
+
+  .grades-table th:nth-child(1),
+  .grades-table th:nth-child(2) {
+    z-index: 3;
+  }
+
   .upload-step-disabled {
     opacity: 0.55;
+  }
+
+  .roster-warning-list {
+    max-height: 160px;
+    overflow: auto;
+    padding-left: 1.25rem;
+  }
+
+  .export-table-wrapper {
+    max-height: 560px;
+    overflow: auto;
+  }
+
+  .average-score-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .export-table {
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  .export-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #0d6efd !important;
+    color: #fff;
+    border-bottom: 2px solid #000;
+  }
+
+  .export-table th,
+  .export-table td {
+    border: 1px solid #000;
+    vertical-align: middle;
   }
 
   /* High Contrast Modals */

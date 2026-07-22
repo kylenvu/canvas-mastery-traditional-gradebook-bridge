@@ -1,4 +1,19 @@
 <script>
+  var averageScoreStudents = [];
+
+  document.addEventListener("DOMContentLoaded", function() {
+    var maxScoreInput = document.getElementById("max-score-input");
+    if (!maxScoreInput) {
+      return;
+    }
+
+    maxScoreInput.addEventListener("input", function() {
+      if (averageScoreStudents.length > 0) {
+        renderExportTable(averageScoreStudents);
+      }
+    });
+  });
+
   function renderParsedGrades(parsedGrades) {
     if (!parsedGrades) {
       renderGradesMessage("No grade data was returned from the server.");
@@ -7,13 +22,21 @@
 
     if (parsedGrades.error) {
       renderGradesMessage(parsedGrades.error);
+      renderExportMessage(parsedGrades.error);
       return;
     }
 
-    renderGradesTable(parsedGrades.students || [], parsedGrades.assignments || [], parsedGrades.studentFields || []);
+    if ((parsedGrades.students || []).length === 0 && parsedGrades.warning) {
+      renderGradesWarningOnly(parsedGrades);
+      renderExportMessage(parsedGrades.warning);
+      return;
+    }
+
+    renderGradesTable(parsedGrades.students || [], parsedGrades.assignments || [], parsedGrades.studentFields || [], parsedGrades);
+    renderExportTable(parsedGrades.students || []);
   }
 
-  function renderGradesTable(students, assignments, studentFields) {
+  function renderGradesTable(students, assignments, studentFields, parsedGrades) {
     var gradesTab = document.getElementById("grades-tab");
     var table = document.createElement("table");
     table.className = "table table-striped table-hover grades-table mb-0";
@@ -46,7 +69,14 @@
     wrapper.className = "grades-table-wrapper";
     wrapper.appendChild(table);
 
-    replaceElementChildren(gradesTab, wrapper);
+    var content = document.createDocumentFragment();
+    var warning = createRosterMismatchWarning(parsedGrades);
+    if (warning) {
+      content.appendChild(warning);
+    }
+    content.appendChild(wrapper);
+
+    replaceElementChildren(gradesTab, content);
   }
 
   function getStudentIdentityValues(student, identityHeaders) {
@@ -63,6 +93,42 @@
     });
   }
 
+  function createRosterMismatchWarning(parsedGrades) {
+    if (!parsedGrades || !parsedGrades.warning) {
+      return null;
+    }
+
+    var warning = document.createElement("div");
+    warning.className = "alert alert-warning roster-warning";
+
+    var message = document.createElement("div");
+    message.className = "fw-bold mb-2";
+    message.textContent = parsedGrades.warning;
+    warning.appendChild(message);
+
+    var unmatchedStudents = parsedGrades.unmatchedStudents || [];
+    if (unmatchedStudents.length > 0) {
+      var list = document.createElement("ul");
+      list.className = "mb-0 roster-warning-list";
+
+      unmatchedStudents.forEach(function(student) {
+        var item = document.createElement("li");
+        item.textContent = student.name + (student.id ? " (" + student.id + ")" : "");
+        list.appendChild(item);
+      });
+
+      warning.appendChild(list);
+    }
+
+    return warning;
+  }
+
+  function renderGradesWarningOnly(parsedGrades) {
+    var gradesTab = document.getElementById("grades-tab");
+    var warning = createRosterMismatchWarning(parsedGrades);
+    replaceElementChildren(gradesTab, warning);
+  }
+
   function renderGradesMessage(message) {
     var gradesTab = document.getElementById("grades-tab");
 
@@ -72,6 +138,175 @@
     replaceElementChildren(gradesTab, alert);
   }
 
+  function renderExportTable(students) {
+    averageScoreStudents = students;
+
+    var exportTab = document.getElementById("export-tab");
+    var selectedView = getAverageScoreViewMode();
+    var maxScore = getMaxScoreValue();
+    var content = document.createDocumentFragment();
+    content.appendChild(createAverageScoreOptions(selectedView, maxScore));
+
+    if (selectedView === "percent" && !maxScore) {
+      var warning = document.createElement("div");
+      warning.className = "alert alert-warning";
+      warning.textContent = "Enter a valid max score per outcome to view averages as percentages.";
+      content.appendChild(warning);
+    }
+
+    var table = document.createElement("table");
+    table.className = "table table-striped table-hover export-table mb-0";
+
+    var thead = document.createElement("thead");
+    var headerRow = document.createElement("tr");
+    ["Student ID", "Student Name", "Section", "Total Average Score"].forEach(function(header) {
+      var th = document.createElement("th");
+      th.scope = "col";
+      th.textContent = header;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    var tbody = document.createElement("tbody");
+    students.forEach(function(student) {
+      var tr = document.createElement("tr");
+      [
+        student.id || "",
+        student.name || "",
+        student.section || "",
+        formatAverageScore(student.scores || [], selectedView, maxScore)
+      ].forEach(function(value) {
+        var td = document.createElement("td");
+        td.textContent = value;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    var wrapper = document.createElement("div");
+    wrapper.className = "export-table-wrapper";
+    wrapper.appendChild(table);
+    content.appendChild(wrapper);
+
+    replaceElementChildren(exportTab, content);
+  }
+
+  function createAverageScoreOptions(selectedView, maxScore) {
+    var options = document.createElement("div");
+    options.className = "average-score-options";
+
+    [
+      {
+        id: "average-view-max-score",
+        value: "max",
+        label: "View as max score (out of " + formatMaxScoreLabel(maxScore) + ")"
+      },
+      {
+        id: "average-view-percent",
+        value: "percent",
+        label: "View as percent (out of 100.0%)"
+      }
+    ].forEach(function(option) {
+      var wrapper = document.createElement("div");
+      wrapper.className = "form-check";
+
+      var input = document.createElement("input");
+      input.className = "form-check-input";
+      input.type = "radio";
+      input.name = "average-score-view";
+      input.id = option.id;
+      input.value = option.value;
+      input.checked = selectedView === option.value;
+      input.addEventListener("change", function() {
+        renderExportTable(averageScoreStudents);
+      });
+
+      var label = document.createElement("label");
+      label.className = "form-check-label";
+      label.htmlFor = option.id;
+      label.textContent = option.label;
+
+      wrapper.appendChild(input);
+      wrapper.appendChild(label);
+      options.appendChild(wrapper);
+    });
+
+    return options;
+  }
+
+  function formatAverageScore(scores, viewMode, maxScore) {
+    var average = calculateAverageScore(scores);
+
+    if (average === null) {
+      return "";
+    }
+
+    if (viewMode === "percent") {
+      if (!maxScore) {
+        return "";
+      }
+
+      return ((average / maxScore) * 100).toFixed(2);
+    }
+
+    return average.toFixed(2);
+  }
+
+  function calculateAverageScore(scores) {
+    var numericScores = scores
+      .map(function(score) {
+        return parseFloat(score);
+      })
+      .filter(function(score) {
+        return !isNaN(score);
+      });
+
+    if (numericScores.length === 0) {
+      return null;
+    }
+
+    var total = numericScores.reduce(function(sum, score) {
+      return sum + score;
+    }, 0);
+
+    return total / numericScores.length;
+  }
+
+  function getAverageScoreViewMode() {
+    var selectedOption = document.querySelector('input[name="average-score-view"]:checked');
+    return selectedOption ? selectedOption.value : "max";
+  }
+
+  function getMaxScoreValue() {
+    var maxScoreInput = document.getElementById("max-score-input");
+    var maxScore = parseFloat(maxScoreInput.value);
+
+    if (isNaN(maxScore) || maxScore <= 0) {
+      return null;
+    }
+
+    return maxScore;
+  }
+
+  function formatMaxScoreLabel(maxScore) {
+    if (!maxScore) {
+      return "";
+    }
+
+    return maxScore.toFixed(2);
+  }
+
+  function renderExportMessage(message) {
+    var exportTab = document.getElementById("export-tab");
+
+    var alert = document.createElement("div");
+    alert.className = "alert alert-warning mb-0";
+    alert.textContent = message;
+    replaceElementChildren(exportTab, alert);
+  }
+
   function renderGradesLoading(message) {
     var gradesTab = document.getElementById("grades-tab");
 
@@ -79,6 +314,7 @@
     loading.className = "alert alert-info mb-0";
     loading.textContent = message;
     replaceElementChildren(gradesTab, loading);
+    renderExportMessage("Waiting for grade data.");
   }
 
   function replaceElementChildren(element, child) {
