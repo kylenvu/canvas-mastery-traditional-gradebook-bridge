@@ -2,8 +2,8 @@ function doGet() {
   var template = HtmlService.createTemplateFromFile('Index');
   
   // Retrieve active user's email (or fallback if empty)
-  var userEmail = Session.getActiveUser().getEmail() || "User Email Not Available";
-  template.userEmail = userEmail;
+  // var userEmail = Session.getActiveUser().getEmail() || "User Email Not Available";
+  // template.userEmail = userEmail;
 
   return template
       .evaluate()
