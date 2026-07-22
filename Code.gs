@@ -105,7 +105,8 @@ function parseGradeCsv(csvText, rosterStudents) {
     .map(function(header, index) {
       return {
         name: getAssignmentName_(header),
-        index: index
+        index: index,
+        masteryIndex: index + 1
       };
     })
     .filter(function(column) {
@@ -141,7 +142,8 @@ function parseGradeCsv(csvText, rosterStudents) {
         section: rosterStudent.section || '',
         scores: assignmentColumns.map(function(column) {
           return row[column.index] || '';
-        })
+        }),
+        numberMastered: countMasteredAssignments_(row, assignmentColumns)
       });
       return foundStudents;
     }, [])
@@ -152,6 +154,7 @@ function parseGradeCsv(csvText, rosterStudents) {
     assignments: assignmentColumns.map(function(column) {
       return column.name;
     }),
+    totalStandards: assignmentColumns.length,
     students: students,
     unmatchedStudents: unmatchedStudents,
     warning: buildRosterMismatchWarning_(unmatchedStudents, studentRows.length)
@@ -173,6 +176,19 @@ function columnHasScores_(rows, columnIndex) {
   return rows.some(function(row) {
     return String(row[columnIndex] || '').trim() !== '';
   });
+}
+
+function countMasteredAssignments_(row, assignmentColumns) {
+  return assignmentColumns.reduce(function(total, column) {
+    var score = parseFloat(row[column.index]);
+    var threshold = parseFloat(row[column.masteryIndex]);
+
+    if (!isNaN(score) && !isNaN(threshold) && score >= threshold) {
+      return total + 1;
+    }
+
+    return total;
+  }, 0);
 }
 
 function formatStudentName_(name) {

@@ -145,24 +145,44 @@
     padding-left: 1.25rem;
   }
 
-  .export-table-wrapper {
+  .export-table-wrapper,
+  .summary-table-wrapper {
     max-height: 560px;
     overflow: auto;
   }
 
-  .average-score-options {
+  .average-score-options,
+  .summary-options {
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
+  }
+
+  .average-score-options {
     margin-bottom: 16px;
   }
 
-  .export-table {
+  .summary-controls {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .summary-total {
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .export-table,
+  .summary-table {
     font-size: 0.875rem;
     white-space: nowrap;
   }
 
-  .export-table th {
+  .export-table th,
+  .summary-table th {
     position: sticky;
     top: 0;
     z-index: 1;
@@ -172,7 +192,9 @@
   }
 
   .export-table th,
-  .export-table td {
+  .export-table td,
+  .summary-table th,
+  .summary-table td {
     border: 1px solid #000;
     vertical-align: middle;
   }

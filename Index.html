@@ -147,7 +147,7 @@
         <input type="file" id="mastery-file-input" accept=".csv" style="display: none;" onchange="handleMasteryFileSelected(event)">
 
         <!-- Upload File Button -->
-        <button type="button" class="btn btn-info fw-bold" onclick="handleUploadClick()">Upload file</button>
+        <button type="button" class="btn btn-info fw-bold" onclick="handleUploadClick()">Upload roster and gradebook</button>
       </div>
 
       <!-- Bottom Panel & Tabs -->
@@ -157,6 +157,9 @@
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="export-tab-btn" data-bs-toggle="tab" data-bs-target="#export-tab" type="button" role="tab">Average Scores</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="number-mastered-tab-btn" data-bs-toggle="tab" data-bs-target="#number-mastered-tab" type="button" role="tab">Number Mastered</button>
         </li>
       </ul>
       
@@ -169,6 +172,11 @@
           
           <!-- Export Tab Content -->
           <div id="export-tab" class="tab-pane fade" role="tabpanel">
+            <!-- Initially Empty -->
+          </div>
+
+          <!-- Number Mastered Tab Content -->
+          <div id="number-mastered-tab" class="tab-pane fade" role="tabpanel">
             <!-- Initially Empty -->
           </div>
         </div>
