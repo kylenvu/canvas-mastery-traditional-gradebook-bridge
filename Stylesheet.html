@@ -12,6 +12,18 @@
     padding: 0 20px;
   }
 
+  .wide-panel {
+    margin-left: calc((950px - min(95vw, 1500px)) / 2);
+    width: min(95vw, 1500px);
+  }
+
+  @media (max-width: 950px) {
+    .wide-panel {
+      margin-left: 0;
+      width: 100%;
+    }
+  }
+
   .section-box {
     padding: 25px 30px;
     box-sizing: border-box;
@@ -258,10 +270,12 @@
     border-width: 2px !important;
   }
 
-  .version-tag {
+  .footer-tag,
+  .version-tag,
+  .license-tag,
+  .acknowledgement-tag {
     position: fixed;
     bottom: 12px;
-    right: 18px;
     font-size: 13px;
     color: #000;
     font-weight: bold;
@@ -270,5 +284,40 @@
     padding: 4px 8px;
     border: 1px solid #000;
     border-radius: 4px;
+  }
+
+  .license-tag {
+    left: 18px;
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px 5px;
+    line-height: 1.25;
+    max-width: min(520px, calc(50vw - 42px));
+  }
+
+  .license-tag a {
+    color: #0d6efd;
+    text-decoration: none;
+  }
+
+  .license-tag a:hover {
+    text-decoration: underline;
+  }
+
+  .license-tag img {
+    height: 1em;
+    width: 1em;
+  }
+
+  .acknowledgement-tag {
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    max-width: min(520px, calc(100vw - 220px));
+  }
+
+  .version-tag {
+    right: 18px;
   }
 </style>
