@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <?!= include('Stylesheet'); ?>
+  </head>
+  <body class="bg-light">
+    
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settings-modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Settings</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p>Settings options will go here.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal fade" id="help-modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Help</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p>Help information will go here.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container mt-4">
+      
+      <!-- Top Panel -->
+      <div class="top-panel section-box mb-4">
+        <div class="d-flex justify-content-between align-items-start mb-4">
+          <h1 class="display-4 fw-bold">John Doe</h1>
+          <div class="gap-2 d-flex">
+            <button type="button" class="btn btn-outline-dark rounded-circle icon-btn" 
+                    data-bs-toggle="modal" data-bs-target="#settings-modal" title="Settings">⚙</button>
+            <button type="button" class="btn btn-outline-dark rounded-circle icon-btn" 
+                    data-bs-toggle="modal" data-bs-target="#help-modal" title="Help">?</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Copy and paste course home page URL:</label>
+            <input type="text" class="form-control">
+          </div>
+          <!-- Read-only Institution Field -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Institution:</label>
+            <input type="text" class="form-control" readonly value="Sample Inst">
+          </div>
+          <!-- Read-only Course ID Field -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Course ID:</label>
+            <input type="text" class="form-control" readonly value="12345">
+          </div>
+          <!-- Positive Integer Only Field -->
+          <div class="mb-3">
+            <label for="max-score-input" class="form-label fw-bold">Max Score per Outcome:</label>
+            <input 
+              type="number" 
+              id="max-score-input"
+              class="form-control" 
+              style="max-width: 120px;"
+              min="1" 
+              step="1" 
+              oninput="this.value = !!this.value && Math.abs(this.value) >= 1 ? Math.floor(Math.abs(this.value)) : ''"
+            >
+          </div>
+        </div>
+
+        <!-- Hidden Native File Input -->
+        <input type="file" id="file-input" accept=".csv" style="display: none;" onchange="handleFileSelected(event)">
+
+        <!-- Upload File Button -->
+        <button type="button" class="btn btn-info fw-bold" onclick="handleUploadClick()">Upload file</button>
+      </div>
+
+      <!-- Bottom Panel & Tabs -->
+      <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="grades-tab-btn" data-bs-toggle="tab" data-bs-target="#grades-tab" type="button" role="tab">Grades</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="export-tab-btn" data-bs-toggle="tab" data-bs-target="#export-tab" type="button" role="tab">Export</button>
+        </li>
+      </ul>
+      
+      <div class="bottom-panel section-box">
+        <div class="tab-content">
+          <!-- Grades Tab Content -->
+          <div id="grades-tab" class="tab-pane fade show active" role="tabpanel">
+            <!-- Initially Empty -->
+          </div>
+          
+          <!-- Export Tab Content -->
+          <div id="export-tab" class="tab-pane fade" role="tabpanel">
+            <!-- Initially Empty -->
+          </div>
+        </div>
+      </div>
+      
+    </div>
+
+    <!-- Footer Version Tag -->
+    <div class="version-tag">v0.1.0</div>
+
+    <!-- Bootstrap 5 JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <?!= include('JavaScript'); ?>
+  </body>
+</html>
