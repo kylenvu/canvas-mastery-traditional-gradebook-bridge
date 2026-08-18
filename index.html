@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="style.css" rel="stylesheet">
+  </head>
+  <body class="bg-light pb-4">
+    
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settings-modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content border border-3 border-dark rounded-3">
+          <div class="modal-header bg-primary text-white border-bottom border-2 border-dark">
+            <h5 class="modal-title fw-bold">Settings</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p>Settings options will go here.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal fade" id="help-modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content border border-3 border-dark rounded-3">
+          <div class="modal-header bg-primary text-white border-bottom border-2 border-dark">
+            <h5 class="modal-title fw-bold">Help</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="help-about">
+              <h6 class="fw-bold">About</h6>
+              <p class="mb-2">Canvas Mastery to Traditional Gradebook Bridge</p>
+              <p class="mb-3"><span class="fw-bold">Version:</span> v0.9.0</p>
+
+              <h6 class="fw-bold">Acknowledgement</h6>
+              <p class="mb-3">Created with assistance from ChatGPT-5.5 and Gemini 3.6-Flash.</p>
+
+              <h6 class="fw-bold">License</h6>
+              <p class="d-flex flex-wrap align-items-center gap-2 mb-0" style="line-height: 1.35;">
+                <a href="#" class="text-decoration-none">Canvas Mastery to Traditional Gradebook Bridge</a>
+                by <a href="https://github.com/kylenvu/canvas-mastery-traditional-gradebook-bridge" class="text-decoration-none">Kyle Vu</a>
+                is marked <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="text-decoration-none">CC0 1.0</a>
+                <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="Creative Commons" style="height: 1em;">
+                <img src="https://mirrors.creativecommons.org/presskit/icons/zero.svg" alt="CC0" style="height: 1em;">
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal fade" id="upload-modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content border border-3 border-dark rounded-3">
+          <div class="modal-header bg-primary text-white border-bottom border-2 border-dark">
+            <h5 class="modal-title fw-bold">Upload Gradebook Files</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="upload-step" id="traditional-upload-step">
+              <div class="d-flex align-items-center justify-content-between gap-3">
+                <div>
+                  <h6 class="fw-bold mb-1">Traditional Gradebook Export</h6>
+                  <p class="mb-0 text-muted">Upload the Canvas traditional gradebook export first.</p>
+                </div>
+                <button type="button" class="btn btn-primary fw-semibold border border-2 border-dark" onclick="triggerTraditionalGradebookSelect()">Upload file</button>
+              </div>
+              <div class="small mt-2" id="traditional-upload-status">Waiting for file.</div>
+            </div>
+
+            <hr>
+
+            <div class="upload-step opacity-50" id="mastery-upload-step">
+              <div class="d-flex align-items-center justify-content-between gap-3">
+                <div>
+                  <h6 class="fw-bold mb-1">Mastery Gradebook Export</h6>
+                  <p class="mb-0 text-muted">Upload the mastery outcome CSV after the traditional export is processed.</p>
+                </div>
+                <button type="button" class="btn btn-primary fw-semibold border border-2 border-dark" id="mastery-upload-button" onclick="triggerMasteryGradebookSelect()" disabled>Upload file</button>
+              </div>
+              <div class="small mt-2" id="mastery-upload-status">Complete the first upload to continue.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Max Score Modal -->
+    <div class="modal fade" id="max-score-modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content border border-3 border-dark rounded-3">
+          <div class="modal-header bg-primary text-white border-bottom border-2 border-dark">
+            <h5 class="modal-title fw-bold">Max Score per Outcome</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <label for="max-score-modal-input" class="form-label fw-bold text-dark">Enter a positive integer greater than 0:</label>
+            <input type="number" id="max-score-modal-input" class="form-control border border-2 border-dark" min="1" step="1">
+            <div class="small text-danger mt-2 d-none" id="max-score-modal-error">Please enter an integer greater than 0.</div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary fw-semibold border border-2 border-dark" onclick="saveMaxScoreAndContinue()">Continue</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container mt-4 px-3" style="max-width: 950px;">
+      
+      <!-- Top Panel -->
+      <div class="p-4 bg-white border border-3 border-dark rounded-3 shadow mb-4">
+        <div class="d-flex justify-content-between align-items-start mb-4">
+          <div class="gap-2 d-flex ms-auto">
+            <button type="button" class="btn btn-outline-dark fw-bold rounded-circle p-0 d-flex align-items-center justify-content-center border-2 icon-btn" 
+                    style="width: 45px; height: 45px; font-size: 22px;"
+                    data-bs-toggle="modal" data-bs-target="#settings-modal" title="Settings">⚙</button>
+            <button type="button" class="btn btn-outline-dark fw-bold rounded-circle p-0 d-flex align-items-center justify-content-center border-2 icon-btn" 
+                    style="width: 45px; height: 45px; font-size: 22px;"
+                    data-bs-toggle="modal" data-bs-target="#help-modal" title="Help">?</button>
+          </div>
+        </div>
+
+        <div>
+          <!-- Positive Integer Only Field -->
+          <div class="mb-3">
+            <label for="max-score-input" class="form-label fw-bold text-dark">Max Score per Outcome:</label>
+            <input 
+              type="number" 
+              id="max-score-input"
+              class="form-control border border-2 border-dark" 
+              style="max-width: 120px;"
+              min="1" 
+              step="1" 
+              oninput="this.value = !!this.value && Math.abs(this.value) >= 1 ? Math.floor(Math.abs(this.value)) : ''"
+            >
+          </div>
+        </div>
+
+        <!-- Hidden Native File Inputs -->
+        <input type="file" id="traditional-file-input" accept=".csv" class="d-none" onchange="handleTraditionalFileSelected(event)">
+        <input type="file" id="mastery-file-input" accept=".csv" class="d-none" onchange="handleMasteryFileSelected(event)">
+
+        <!-- Upload File Button -->
+        <button type="button" class="btn btn-info fw-bold border border-2 border-dark" onclick="handleUploadClick()">Upload roster and gradebook</button>
+      </div>
+
+      <div class="wide-panel">
+        <!-- Bottom Panel & Tabs -->
+        <ul class="nav nav-tabs border-bottom border-3 border-dark mb-3" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link custom-tab active" id="grades-tab-btn" data-bs-toggle="tab" data-bs-target="#grades-tab" type="button" role="tab">Grades</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link custom-tab" id="export-tab-btn" data-bs-toggle="tab" data-bs-target="#export-tab" type="button" role="tab">Average Scores</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link custom-tab" id="number-mastered-tab-btn" data-bs-toggle="tab" data-bs-target="#number-mastered-tab" type="button" role="tab">Number Mastered</button>
+          </li>
+        </ul>
+        
+        <div class="p-4 bg-white border border-3 border-dark rounded-3 shadow" style="min-height: 350px;">
+          <div class="tab-content">
+            <!-- Grades Tab Content -->
+            <div id="grades-tab" class="tab-pane fade show active" role="tabpanel">
+              <!-- Initially Empty -->
+            </div>
+            
+            <!-- Export Tab Content -->
+            <div id="export-tab" class="tab-pane fade" role="tabpanel">
+              <!-- Initially Empty -->
+            </div>
+
+            <!-- Number Mastered Tab Content -->
+            <div id="number-mastered-tab" class="tab-pane fade" role="tabpanel">
+              <!-- Initially Empty -->
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="script.js"></script>
+  </body>
+</html>
